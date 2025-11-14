@@ -1,0 +1,6 @@
+[package]
+name = "ch02_text_processing"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

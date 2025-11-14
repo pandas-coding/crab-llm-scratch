@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "crab-llm-scratch"
+name = "ch02_text_processing"
 version = "0.1.0"
