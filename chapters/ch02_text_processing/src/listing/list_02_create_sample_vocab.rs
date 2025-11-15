@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use regex::Regex;
-use crate::listing::read_sample_text::{read_sample_text, SAMPLE_TEXT_PATH};
+use crate::listing::list_01_read_sample_text::{read_sample_text, SAMPLE_TEXT_PATH};
 
 pub fn create_sample_vocab() -> std::io::Result<HashMap<String, i32>> {
     let text = read_sample_text(SAMPLE_TEXT_PATH)?;
