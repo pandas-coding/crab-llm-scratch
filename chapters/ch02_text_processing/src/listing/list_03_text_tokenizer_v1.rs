@@ -59,7 +59,7 @@ impl SimpleTokenizerV1 {
 
 #[cfg(test)]
 mod tests {
-    use crate::listing::list_03_text_tokenizer::SimpleTokenizerV1;
+    use crate::listing::list_03_text_tokenizer_v1::SimpleTokenizerV1;
 
     /// Generate vocab for testing.
     fn gen_vocab() -> Vec<(&'static str, i32)> {
