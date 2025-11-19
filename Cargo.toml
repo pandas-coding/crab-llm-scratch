@@ -11,3 +11,4 @@ edition = "2024"
 
 [workspace.dependencies]
 regex = "1.12.2"
+tiktoken-rs = "0.9.1"
