@@ -4,5 +4,10 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+anyhow = { workspace = true }
 regex = { workspace = true }
 tiktoken-rs = { workspace = true }
+candle-core = { workspace = true }
+candle-datasets = { workspace = true }
+candle-nn = { workspace = true }
+rand = { workspace = true }

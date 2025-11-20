@@ -57,6 +57,55 @@ impl GPTDatasetV1 {
 
 }
 
+/// `GPTDatasetIter` analagous to PyTorch's `DataLoader`
+/// A data loader to generate batches with input-target pairs
+/// We can use `GPTDatasetIter` with `candle_datasets::Batcher` to get desired
+/// batches of examples.
+pub struct GPTDatasetIter {
+    dataset: GPTDatasetV1,
+    remaining_indices: Vec<usize>,
+}
+
+impl Iterator for GPTDatasetIter {
+    type Item = candle_core::Result<(candle_core::Tensor, candle_core::Tensor)>;
+    fn next(&mut self) -> Option<Self::Item> {
+        use candle_core::{Device, Tensor};
+
+        match self.remaining_indices.pop() {
+            None => None,
+            Some(idx) => {
+                let (input_idx,  target_ids) = self.dataset.get_pair_at_index(idx);
+
+                // turn into Tensors and return
+                let device = Device::cuda_if_available(0).unwrap();
+                let input_tensor = Tensor::new(&input_idx[..], &device);
+                let target_tensor = Tensor::new(&target_ids[..], &device);
+                Some(candle_core::error::zip(input_tensor, target_tensor))
+            }
+        }
+    }
+}
+
+impl GPTDatasetIter {
+    /// Creates a new `GPTDatasetIter`.
+    pub fn new(dataset: &GPTDatasetV1, shuffle: bool) -> Self {
+        use rand::{rng, seq::SliceRandom};
+
+        let mut indices: Vec<usize> = (0..dataset.len()).collect();
+
+        if shuffle {
+            indices.shuffle(&mut rng());
+        } else {
+            indices.reverse();
+        }
+
+        Self {
+            dataset: dataset.clone(),
+            remaining_indices: indices,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -90,5 +139,42 @@ mod tests {
             // test stride alignments
             assert_eq!(dataset.input_ids[ix][0], token_ids[ix * stride]);
         }
+    }
+
+    #[test]
+    fn test_gpt_dataset_v1_iter() -> anyhow::Result<()> {
+        let (txt, tokenizer) = txt_tokenizer();
+        let stride = 1usize;
+        let max_length = 3usize;
+        let dataset = GPTDatasetV1::new(&txt, tokenizer, max_length, stride);
+        let iter = GPTDatasetIter::new(&dataset, false);
+
+        // 使用函数式编程风格：try_for_each 替代 for 循环
+        iter.enumerate()
+            .try_for_each(|(idx, result)| {
+                let (input_tensor, target_tensor) = result?;
+                
+                // 验证张量形状
+                assert_eq!(input_tensor.shape().dims()[0], max_length);
+                assert_eq!(target_tensor.shape().dims()[0], max_length);
+
+                // 转换并验证数据一致性
+                let verify_slice = |tensor: candle_core::Tensor, expected: &[u32], label: &str| -> anyhow::Result<()> {
+                    let actual = tensor.to_vec1::<u32>()?;
+                    assert_eq!(
+                        actual.as_slice(),
+                        expected,
+                        "{} 在索引 {} 处不匹配",
+                        label,
+                        idx
+                    );
+                    Ok(())
+                };
+
+                verify_slice(input_tensor, &dataset.input_ids[idx], "输入序列")?;
+                verify_slice(target_tensor, &dataset.target_ids[idx], "目标序列")?;
+
+                Ok(())
+            })
     }
 }
