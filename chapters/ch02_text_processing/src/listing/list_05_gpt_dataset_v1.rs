@@ -108,6 +108,7 @@ impl GPTDatasetIter {
 
 #[cfg(test)]
 mod tests {
+    use candle_datasets::Batcher;
     use super::*;
 
     /// generate txt tokenizer.
@@ -115,6 +116,13 @@ mod tests {
         let txt = "In the heart of the city";
         let tokenizer =  tiktoken_rs::get_bpe_from_model("gpt2").unwrap();
         (txt.to_string(), tokenizer)
+    }
+
+    fn gpt_dataset() -> GPTDatasetV1 {
+        let stride = 1usize;
+        let max_len  = 3usize;
+        let (txt, tokenizer) = txt_tokenizer();
+        GPTDatasetV1::new(&txt, tokenizer, max_len, stride)
     }
 
     #[test]
@@ -176,5 +184,23 @@ mod tests {
 
                 Ok(())
             })
+    }
+
+    #[test]
+    fn test_gpt_dataset_with_batch() -> anyhow::Result<()> {
+        let batch_size = 2usize;
+        let dataset =  gpt_dataset();
+        let iter = GPTDatasetIter::new(&dataset, false);
+        let mut batch_iter = Batcher::new_r2(iter).batch_size(batch_size);
+        match batch_iter.next() {
+            None => panic!("None iter"),
+            Some(Err(err)) => panic!("{}", err),
+            Some(Ok((inputs, targets))) => {
+                assert_eq!(inputs.dims(), targets.dims());
+                assert_eq!(inputs.dims()[0], batch_size);
+            }
+        }
+
+        Ok(())
     }
 }
