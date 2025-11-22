@@ -396,6 +396,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch03_attention"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "candle-core",
+ "candle-datasets",
+ "candle-nn",
+ "rand",
+ "regex",
+ "tiktoken-rs",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
