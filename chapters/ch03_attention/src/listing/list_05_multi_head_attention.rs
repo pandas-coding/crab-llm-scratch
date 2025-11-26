@@ -27,6 +27,7 @@ impl ModuleT for MultiHeadAttention {
         // with one matrix multiplication
         // 从形状(b, num_tokens, num_heads, head_dim)
         // 转换到(b, num_heads, num_tokens, head_dim)
+        // split matrix with num_heads dimension
         let queries = queries
             .reshape((b, num_tokens, self.num_heads, self.head_dim))?
             .transpose(1, 2)?
