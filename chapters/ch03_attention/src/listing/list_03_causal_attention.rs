@@ -1,20 +1,7 @@
-use candle_core::{Device, Module, Tensor, D};
+use candle_core::{Module, Tensor, D};
 use candle_nn::{linear_b, Dropout, Linear, VarBuilder};
 use candle_nn::ops::softmax;
-
-pub fn get_mask(size: usize, device: &Device) -> candle_core::Result<Tensor> {
-    let mask: Vec<_> = (0..size)
-        .flat_map(|i| (0..size).map(move |j| u32::from(j > i)))
-        .collect();
-    Tensor::from_slice(&mask, (size, size), device)
-}
-
-pub fn masked_fill(on_false: &Tensor, mask: &Tensor, on_true: f32) -> candle_core::Result<Tensor> {
-    let shape = mask.shape();
-    let on_true = Tensor::new(on_true, on_false.device())?.broadcast_as(shape.dims())?;
-    let m = mask.where_cond(&on_true, on_false)?;
-    Ok(m)
-}
+use crate::listing;
 
 /// A compact causal attention class
 pub struct CausalAttention {
@@ -36,8 +23,8 @@ impl Module for CausalAttention {
 
         // transpose dim1 and dim2, make batch dim remain the same.
         let attention_scores = queries.matmul(&keys.transpose(D::Minus2, D::Minus1)?)?;
-        let mask = get_mask(num_tokens, xs.device())?;
-        let masked = masked_fill(
+        let mask = listing::get_mask(num_tokens, xs.device())?;
+        let masked = listing::masked_fill(
             &attention_scores,
             &mask.broadcast_left(b).unwrap(),
             f32::NEG_INFINITY,
