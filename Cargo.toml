@@ -2,7 +2,7 @@
 resolver = "3"
 members = [
     "chapters/ch02_text_processing"
-, "chapters/ch03_attention"]
+, "chapters/ch03_attention", "chapters/ch04_gpt_implementation"]
 
 [workspace.package]
 name = "crab-llm-scratch"

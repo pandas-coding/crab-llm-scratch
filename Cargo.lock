@@ -409,6 +409,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch04-gpt-implementation"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "candle-core",
+ "candle-datasets",
+ "candle-nn",
+ "rand",
+ "tiktoken-rs",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
