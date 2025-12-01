@@ -1,10 +1,10 @@
 use candle_core::{Device, Tensor};
 
-mod list_01_self_attention_v1;
-mod list_02_self_attention_v2;
-mod list_03_causal_attention;
-mod list_04_muti_head_attention_wrapper;
-mod list_05_multi_head_attention;
+pub mod list_01_self_attention_v1;
+pub mod list_02_self_attention_v2;
+pub mod list_03_causal_attention;
+pub mod list_04_muti_head_attention_wrapper;
+pub mod list_05_multi_head_attention;
 
 pub fn get_mask(size: usize, device: &Device) -> candle_core::Result<Tensor> {
     let mask: Vec<_> = (0..size)

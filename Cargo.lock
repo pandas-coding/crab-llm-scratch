@@ -416,6 +416,7 @@ dependencies = [
  "candle-core",
  "candle-datasets",
  "candle-nn",
+ "ch03_attention",
  "rand",
  "tiktoken-rs",
 ]

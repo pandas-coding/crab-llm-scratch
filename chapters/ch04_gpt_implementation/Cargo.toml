@@ -10,3 +10,5 @@ candle-core = { workspace = true }
 candle-datasets = { workspace = true }
 candle-nn = { workspace = true }
 rand = { workspace = true }
+
+ch03_attention = { path = "../ch03_attention" }

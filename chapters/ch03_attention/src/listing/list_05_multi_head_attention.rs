@@ -137,6 +137,10 @@ impl MultiHeadAttention {
     pub fn head_dim(&self) -> usize {
         self.head_dim
     }
+    
+    pub fn num_heads(&self) -> usize {
+        self.num_heads
+    }
 
     /// Manual implementation of forward
     ///

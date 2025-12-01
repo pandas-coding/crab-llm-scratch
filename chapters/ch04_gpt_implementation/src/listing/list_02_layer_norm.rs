@@ -4,6 +4,7 @@ use candle_nn::VarBuilder;
 const EPS: f32 = 1e-5;
 
 /// A layer normalization struct
+#[derive(Debug, Clone)]
 pub struct LayerNorm {
     eps: f32,
     scale: Tensor,
@@ -34,6 +35,14 @@ impl LayerNorm {
             scale,
             shift,
         })
+    }
+    
+    pub fn scale(&self) -> &Tensor {
+        &self.scale
+    }
+    
+    pub fn shift(&self) -> &Tensor {
+        &self.shift
     }
 }
 
