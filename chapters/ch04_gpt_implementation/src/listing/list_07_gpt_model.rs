@@ -4,6 +4,11 @@ use candle_nn::{embedding, linear_b, Dropout, Embedding, Linear, VarBuilder};
 use crate::listing::list_01_dummy_gpt_model::Config;
 use crate::listing::list_02_layer_norm::LayerNorm;
 
+/// Marker trait to consolidate GPTModel and LoRA variant introduced later in the book
+pub trait GPT {
+    fn context_size(&self) -> usize;
+}
+
 pub struct GPTModel {
     tok_emb: Embedding,
     pos_emb: Embedding,
@@ -171,6 +176,12 @@ impl ModuleT for SequentialTransformers {
             .iter()
             .try_fold(xs.to_owned(), |x, layer| layer.forward_t(&x, train))?;
         Ok(out)
+    }
+}
+
+impl GPT for GPTModel {
+    fn context_size(&self) -> usize {
+        self.pos_emb.embeddings().dims()[0]
     }
 }
 
