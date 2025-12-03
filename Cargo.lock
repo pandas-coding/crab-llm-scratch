@@ -409,7 +409,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ch04-gpt-implementation"
+name = "ch04_gpt_implementation"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -420,6 +420,10 @@ dependencies = [
  "rand",
  "tiktoken-rs",
 ]
+
+[[package]]
+name = "ch05_pretraining"
+version = "0.1.0"
 
 [[package]]
 name = "chrono"
