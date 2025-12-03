@@ -1,5 +1,5 @@
 [package]
-name = "ch04-gpt-implementation"
+name = "ch04_gpt_implementation"
 version.workspace = true
 edition.workspace = true
 
