@@ -424,6 +424,13 @@ dependencies = [
 [[package]]
 name = "ch05_pretraining"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "candle-core",
+ "candle-datasets",
+ "candle-nn",
+ "tiktoken-rs",
+]
 
 [[package]]
 name = "chrono"
