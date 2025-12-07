@@ -429,6 +429,8 @@ dependencies = [
  "candle-core",
  "candle-datasets",
  "candle-nn",
+ "ch02_text_processing",
+ "ch04_gpt_implementation",
  "tiktoken-rs",
 ]
 

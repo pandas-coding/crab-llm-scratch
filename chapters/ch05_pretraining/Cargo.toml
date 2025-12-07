@@ -10,3 +10,5 @@ candle-core = { workspace = true }
 candle-datasets = { workspace = true }
 candle-nn = { workspace = true }
 
+ch02_text_processing = { path = "../ch02_text_processing" }
+ch04_gpt_implementation = { path = "../ch04_gpt_implementation" }
