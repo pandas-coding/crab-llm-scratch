@@ -356,6 +356,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "candle_addons"
+version = "0.1.0"
+dependencies = [
+ "candle-core",
+]
+
+[[package]]
 name = "castaway"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -429,8 +436,10 @@ dependencies = [
  "candle-core",
  "candle-datasets",
  "candle-nn",
+ "candle_addons",
  "ch02_text_processing",
  "ch04_gpt_implementation",
+ "rand",
  "tiktoken-rs",
 ]
 

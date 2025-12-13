@@ -1,0 +1,7 @@
+[package]
+name = "candle_addons"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+candle-core = { workspace = true }

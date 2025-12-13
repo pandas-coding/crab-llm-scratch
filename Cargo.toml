@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+    "crates/candle_addons",
     "chapters/ch02_text_processing",
     "chapters/ch03_attention",
     "chapters/ch04_gpt_implementation",
