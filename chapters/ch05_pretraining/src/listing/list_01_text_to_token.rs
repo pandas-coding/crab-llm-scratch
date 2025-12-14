@@ -17,6 +17,7 @@ pub fn token_ids_to_text(token_ids: Tensor, tokenizer: &tiktoken_rs::CoreBPE) ->
 
 #[cfg(test)]
 mod tests {
+    use tiktoken_rs::get_bpe_from_model;
     use super::*;
     use crate::test_utils::get_txt_tokenizer;
 
@@ -28,5 +29,14 @@ mod tests {
         assert_eq!(decoded_text, text);
 
         Ok(())
+    }
+
+    #[test]
+    #[should_panic(expected = "called `Result::unwrap()` on an `Err` value: Unable to decode into a valid UTF-8 string: incomplete utf-8 byte sequence from index 0")]
+    fn test_decode_panics_due_token_ids() {
+        let bad_token_id = 49426_u32; // not sure why this results in an error when decoding
+        let token_ids = Tensor::new(&[[bad_token_id]], &Device::Cpu).unwrap();
+        let tokenizer = get_bpe_from_model("gpt2").unwrap();
+        token_ids_to_text(token_ids, &tokenizer).unwrap();
     }
 }
