@@ -101,7 +101,12 @@ pub fn sample_multinomial(rng: &mut rand::rngs::StdRng, prs: &Vec<f32>) -> candl
 
 #[cfg(test)]
 mod test {
+    use candle_core::{DType, Device};
+    use candle_nn::{VarBuilder, VarMap};
+    use rand::rngs::StdRng;
     use rand::SeedableRng;
+    use ch04_gpt_implementation::listing::list_01_dummy_gpt_model::Config;
+    use ch04_gpt_implementation::listing::list_07_gpt_model::GPTModel;
     use super::*;
 
     #[test]
@@ -111,6 +116,70 @@ mod test {
         let mut rng = rand::rngs::StdRng::seed_from_u64(1234u64);
         let token = sample_multinomial(&mut rng, &prs)?;
         assert_eq!(token, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_topk_last_dim0() -> anyhow::Result<()> {
+        let logits = &[-3f32, -2., -1., 0., 1., 2., 3.];
+        let expected_top_log = &[3f32, 2., 1.];
+        let expected_top_pos = &[6u32, 5, 4];
+        let device = Device::cuda_if_available(0)?;
+        let logits = Tensor::new(logits, &device)?;
+        let (top_logtis, top_pos) = logits.topk_last_dim0(3usize)?;
+        assert_eq!(top_logtis.to_vec1::<f32>()?, expected_top_log);
+        assert_eq!(top_pos.to_vec1::<u32>()?, expected_top_pos);
+        Ok(())
+    }
+
+    #[test]
+    fn test_topk_last_dim1() -> anyhow::Result<()> {
+        let logits = &[
+            [-3f32, -2., -1.],
+            [0., 1., 2.],
+        ];
+        let expected_top_log = &[
+            [-1f32, -2.],
+            [2f32, 1.],
+        ];
+        let expected_top_pos = &[
+            [2u32, 1],
+            [2u32, 1],
+        ];
+        let device = Device::cuda_if_available(0)?;
+        let logits = Tensor::new(logits, &device)?;
+        let top_k = 2usize;
+        let (top_logits, top_pos) = logits.topk_last_dim1(top_k)?;
+        assert_eq!(top_logits.to_vec2::<f32>()?, expected_top_log);
+        assert_eq!(top_pos.to_vec2::<u32>()?, expected_top_pos);
+        Ok(())
+    }
+
+    #[test]
+    fn test_generate() -> anyhow::Result<()> {
+        let device = Device::cuda_if_available(0)?;
+        let batch_token_ids = Tensor::new(&[[101u32, 366, 100, 345], [101, 110, 322, 57]], &device)?;
+
+        let cfg = Config::gpt_sm_test();
+        let varmap = VarMap::new();
+        let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
+        let model = GPTModel::new(cfg, vb)?;
+
+        let (batch_size, seq_len) = batch_token_ids.dims2()?;
+        let (context_size, max_new_tokens) = (2usize, 3usize);
+        let mut rng = StdRng::seed_from_u64(123u64);
+        let idx = generate(
+            &model,
+            batch_token_ids,
+            max_new_tokens,
+            context_size,
+            Some(1f64),
+            Some(3usize),
+            None,
+            &mut rng,
+        )?;
+
+        assert_eq!(idx.dims(), &[batch_size, seq_len + max_new_tokens]);
         Ok(())
     }
 }
