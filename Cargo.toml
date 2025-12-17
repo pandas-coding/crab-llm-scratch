@@ -5,7 +5,7 @@ members = [
     "chapters/ch02_text_processing",
     "chapters/ch03_attention",
     "chapters/ch04_gpt_implementation",
-    "chapters/ch05_pretraining",
+    "chapters/ch05_pretraining", "chapters/ch06_classification_tuning",
 ]
 
 [workspace.package]
