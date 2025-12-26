@@ -1,7 +1,12 @@
+use std::fs::File;
+use std::path::Path;
 use std::rc::Rc;
 use anyhow::anyhow;
+use candle_core::{Device, Tensor};
+use candle_datasets::Batcher;
+use candle_datasets::batcher::IterResult2;
 use polars::datatypes::AnyValue;
-use polars::prelude::DataFrame;
+use polars::prelude::{DataFrame, ParquetReader, SerReader};
 
 pub const PAD_TOKEN_ID: u32 = 50_256_u32;
 
@@ -104,10 +109,94 @@ impl SpamDataset {
     }
 }
 
+/// Builder pattern for `HuggingFaceWeight`
+pub struct SpamDatasetBuilder<'a> {
+    data: Option<DataFrame>,
+    max_len: Option<usize>,
+    pad_token_id: u32,
+    tokenizer: &'a tiktoken_rs::CoreBPE,
+}
+
+impl<'a> SpamDatasetBuilder<'a> {
+    /// Creates a new `SpamDatasetBuilder`.
+    pub fn new(tokenizer: &'a tiktoken_rs::CoreBPE) -> Self {
+        Self {
+            data: None,
+            max_len: None,
+            pad_token_id: PAD_TOKEN_ID,
+            tokenizer,
+        }
+    }
+
+    /// Set data for builder from parquet file.
+    pub fn load_data_from_request<P: AsRef<Path>>(mut self, parquet_file: P) -> Self {
+        let mut file = File::open(parquet_file).unwrap();
+        let df = ParquetReader::new(&mut file).finish().unwrap();
+        self.data = Some(df);
+        self
+    }
+
+    pub fn data(mut self, data: DataFrame) -> Self {
+        self.data = Some(data);
+        self
+    }
+
+    pub fn max_len(mut self, max_len: usize) -> Self {
+        self.max_len = Some(max_len);
+        self
+    }
+
+    pub fn pad_token_id(mut self, pad_token_id: u32) -> Self {
+        self.pad_token_id = pad_token_id;
+        self
+    }
+
+    pub fn build(self) -> SpamDataset {
+        match self.data {
+            None => panic!("DataFrame is not set in SpamDataBuilder."),
+            Some(df) => {
+                SpamDataset::new(df, self.tokenizer, self.max_len, self.pad_token_id)
+            }
+        }
+    }
+}
+
+pub struct SpamDatasetIter {
+    dataset: SpamDataset,
+    remaining_indices: Vec<usize>,
+}
+
+impl Iterator for SpamDatasetIter {
+    type Item = candle_core::Result<(Tensor, Tensor)>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.remaining_indices.pop() {
+            None => None,
+            Some(idx) => {
+                let (encoded, label) = self.dataset.get_item_at_index(idx).unwrap();
+
+                // turn into tensor
+                let device = Device::cuda_if_available(0).unwrap();
+                let encoded_tensor = Tensor::new(&encoded[..], &device);
+                let label_tensor = Tensor::new(&label[..], &device);
+                Some(candle_core::error::zip(encoded_tensor, label_tensor))
+            },
+        }
+    }
+}
+
+/// A type alias for candle_datasets::Batcher
+///
+/// This struct is responsible for getting batches from a type that implements
+/// the `Iterator` Trait.
+pub type SpamDataBatcher = Batcher<IterResult2<SpamDatasetIter>>;
+
+
+
 #[cfg(test)]
 mod tests {
     use tiktoken_rs::get_bpe_from_model;
-    use crate::test_utils::sms_spam_df;
+    use crate::test_utils::{sms_spam_df, test_parquet_path};
     use super::*;
 
     #[test]
@@ -126,6 +215,27 @@ mod tests {
         for text_enc in spam_dataset.encoded_texts.iter() {
             assert_eq!(text_enc.len(), expected_max_len);
         }
+
+        Ok(())
+    }
+
+    #[test]
+    pub fn test_spam_dataset_builder_parquet_file() -> anyhow::Result<()> {
+        let test_parquet_path = test_parquet_path();
+        let max_len = 10usize;
+        let tokenizer = get_bpe_from_model("gpt2")?;
+        let spam_dataset = SpamDatasetBuilder::new(&tokenizer)
+            .load_data_from_request(test_parquet_path)
+            .max_len(max_len)
+            .build();
+
+        assert_eq!(spam_dataset.len(), 5);
+        assert_eq!(spam_dataset.max_len, max_len);
+        // assert all encoded texts have length == max_length
+        for text_enc in spam_dataset.encoded_texts.iter() {
+            assert_eq!(text_enc.len(), max_len);
+        }
+
 
         Ok(())
     }
