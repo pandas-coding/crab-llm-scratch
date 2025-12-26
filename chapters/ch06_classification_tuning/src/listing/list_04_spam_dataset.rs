@@ -7,10 +7,13 @@ use candle_datasets::Batcher;
 use candle_datasets::batcher::IterResult2;
 use polars::datatypes::AnyValue;
 use polars::prelude::{DataFrame, ParquetReader, SerReader};
+use rand::prelude::SliceRandom;
+use rand::rng;
 
 pub const PAD_TOKEN_ID: u32 = 50_256_u32;
 
 /// Setting up a `SpamDataset` struct
+#[derive(Clone)]
 pub struct SpamDataset {
     data: Rc<DataFrame>,
     encoded_texts: Rc<Vec<Vec<u32>>>,
@@ -185,6 +188,39 @@ impl Iterator for SpamDatasetIter {
     }
 }
 
+impl SpamDatasetIter {
+    /// Creates a new `SpamDatasetIter`.
+    ///
+    /// ```rust
+    /// use llms_from_scratch_rs::listings::ch06::{SpamDataset, SpamDatasetIter, PAD_TOKEN_ID};
+    /// use polars::prelude::*;
+    /// use tiktoken_rs::get_bpe_from_model;
+    ///
+    /// let df = df!(
+    ///     "sms"=> &[
+    ///         "Mock example 1",
+    ///         "Mock example 2"
+    ///     ],
+    ///     "label"=> &[0_i64, 1],
+    /// )
+    /// .unwrap();
+    /// let tokenizer = get_bpe_from_model("gpt2").unwrap();
+    /// let max_length = 24_usize;
+    /// let dataset = SpamDataset::new(df, &tokenizer, Some(max_length), PAD_TOKEN_ID);
+    /// let iter = SpamDatasetIter::new(dataset.clone(), false);
+    /// ```
+    pub fn new(dataset: SpamDataset, shuffle: bool) -> Self {
+        let mut remaining_indices = (0..dataset.len()).rev().collect::<Vec<_>>();
+        if shuffle {
+            remaining_indices.shuffle(&mut rng());
+        }
+        Self {
+            dataset,
+            remaining_indices,
+        }
+    }
+}
+
 /// A type alias for candle_datasets::Batcher
 ///
 /// This struct is responsible for getting batches from a type that implements
@@ -236,7 +272,25 @@ mod tests {
             assert_eq!(text_enc.len(), max_len);
         }
 
+        Ok(())
+    }
 
+    #[test]
+    pub fn test_spam_dataset_iter() -> anyhow::Result<()> {
+        let (df, _num_spam) = sms_spam_df();
+        let tokenizer = get_bpe_from_model("gpt2")?;
+        let max_length = 10_usize;
+        let spam_dataset = SpamDataset::new(df, &tokenizer, Some(max_length), PAD_TOKEN_ID);
+        let mut iter = SpamDatasetIter::new(spam_dataset.clone(), false);
+        let mut count = 0_usize;
+
+        // user iter to sequentially get next pair checking equality with dataset
+        while let Some(Ok((this_encodings, this_label))) = iter.next() {
+            assert!(this_encodings.shape().dims()[0] == max_length);
+            assert!(this_label.shape().dims()[0] == 1_usize);
+            count += 1;
+        }
+        assert_eq!(count, spam_dataset.len());
         Ok(())
     }
 }
