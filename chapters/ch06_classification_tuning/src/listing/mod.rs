@@ -2,3 +2,4 @@ mod list_01_download_dataset;
 mod list_02_create_balanced_dataset;
 mod list_03_split_dataset;
 mod list_04_spam_dataset;
+mod list_05_spam_data_loader;
