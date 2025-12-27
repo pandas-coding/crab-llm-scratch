@@ -1,4 +1,4 @@
-mod listing;
+pub mod listing;
 
 #[cfg(test)]
 mod test_utils;

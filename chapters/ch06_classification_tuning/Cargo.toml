@@ -10,8 +10,12 @@ candle-core = { workspace = true }
 candle-datasets = { workspace = true }
 candle-nn = { workspace = true }
 rand = { workspace = true }
+hf-hub = { workspace = true }
 zip = { version = "6.0.0" }
 
 reqwest = { version = "0.12.25", features = ["blocking", "json"] }
 polars = { version = "0.51.0", features = ["csv", "dtype-struct", "lazy", "parquet", "rows", "temporal"] }
 tempfile = { version = "3.23.0" }
+
+ch04_gpt_implementation = { path = "../ch04_gpt_implementation" }
+ch05_pretraining = { path = "../ch05_pretraining" }

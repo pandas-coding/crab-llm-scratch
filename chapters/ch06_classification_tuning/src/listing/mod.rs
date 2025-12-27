@@ -3,3 +3,4 @@ mod list_02_create_balanced_dataset;
 mod list_03_split_dataset;
 mod list_04_spam_dataset;
 mod list_05_spam_data_loader;
+mod list_06_download_and_load_gpt2;
