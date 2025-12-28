@@ -5,6 +5,8 @@ use ch04_gpt_implementation::listing::list_01_dummy_gpt_model::Config;
 use ch04_gpt_implementation::listing::list_07_gpt_model::GPTModel;
 use ch05_pretraining::listing::list_05_load_weights_into_gpt::load_weights_into_gpt;
 
+pub const HF_GPT2_MODEL_ID: &str = "openai-community/gpt2";
+
 /// Loading a pretrained GPT model
 pub fn download_and_load_gpt2(
     varmap: &VarMap,
