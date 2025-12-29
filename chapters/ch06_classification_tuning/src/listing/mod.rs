@@ -5,3 +5,4 @@ mod list_04_spam_dataset;
 mod list_05_spam_data_loader;
 mod list_06_download_and_load_gpt2;
 mod list_07_add_classification_layer;
+mod list_08_calc_accuracy_loader;
