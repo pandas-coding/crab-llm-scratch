@@ -1,7 +1,6 @@
-use std::cmp;
+use crate::listing::list_05_spam_data_loader::SpamDataLoader;
 use candle_core::{Device, ModuleT, Tensor, D};
 use ch04_gpt_implementation::listing::list_07_gpt_model::GPT;
-use crate::listing::list_05_spam_data_loader::SpamDataLoader;
 
 /// Function to compute the training and validation cross-entropy loss
 pub fn calc_loss_loader<M: GPT + ModuleT>(
@@ -66,12 +65,12 @@ pub fn calc_loss_batch<M: GPT + ModuleT>(
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use crate::listing::list_07_add_classification_layer::modify_out_head_for_classification;
     use candle_core::DType;
     use candle_nn::{VarBuilder, VarMap};
     use ch04_gpt_implementation::listing::list_01_dummy_gpt_model::Config;
     use ch04_gpt_implementation::listing::list_07_gpt_model::GPTModel;
-    use crate::listing::list_07_add_classification_layer::modify_out_head_for_classification;
-    use super::*;
 
     #[test]
     fn test_calc_loss_batch() -> anyhow::Result<()> {
