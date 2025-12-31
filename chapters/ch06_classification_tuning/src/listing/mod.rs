@@ -7,3 +7,4 @@ mod list_06_download_and_load_gpt2;
 mod list_07_add_classification_layer;
 mod list_08_calc_accuracy_loader;
 mod list_09_calc_loss_loader;
+mod list_10_train_classifier;
