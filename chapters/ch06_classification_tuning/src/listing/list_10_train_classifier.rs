@@ -39,7 +39,7 @@ pub fn train_classifier_simple<T: Optimizer, M: GPT + ModuleT>(
         )
     };
 
-    for _epoch in 1..=num_epochs {
+    for epoch in 1..=num_epochs {
         let mut train_batcher = train_loader.batcher();
         while let Some((input_batch, target_batch)) = train_batcher.next().transpose()? {
             let loss = calc_loss_batch(
