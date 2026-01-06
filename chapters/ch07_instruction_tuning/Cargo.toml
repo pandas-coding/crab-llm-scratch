@@ -1,0 +1,18 @@
+[package]
+name = "ch07_instruction_tuning"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+tiktoken-rs = { workspace = true }
+candle-core = { workspace = true }
+candle-datasets = { workspace = true }
+candle-nn = { workspace = true }
+rand = { workspace = true }
+hf-hub = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_with = { workspace = true }
+tempfile = { workspace = true }

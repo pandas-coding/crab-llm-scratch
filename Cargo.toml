@@ -5,7 +5,9 @@ members = [
     "chapters/ch02_text_processing",
     "chapters/ch03_attention",
     "chapters/ch04_gpt_implementation",
-    "chapters/ch05_pretraining", "chapters/ch06_classification_tuning",
+    "chapters/ch05_pretraining",
+    "chapters/ch06_classification_tuning",
+    "chapters/ch07_instruction_tuning",
 ]
 
 [workspace.package]
@@ -22,3 +24,8 @@ candle-datasets = "0.9.1"
 candle-nn = "0.9.1"
 rand = "0.9.2"
 hf-hub = "0.4.3"
+reqwest = { version = "0.13.1", features = ["blocking", "json"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.148" }
+serde_with = { version = "3.16.1" }
+tempfile = { version = "3.24.0" }
